@@ -1,0 +1,61 @@
+I put my build tools in a folder called tiva_tools in my home directory.
+If you put yours elsewhere, change the below commands appropriately.
+
+Get your toolchain from here:
+https://launchpad.net/gcc-arm-embedded
+
+Add it to your PATH by adding a similar line to your .profile
+export PATH=$PATH:$HOME/tiva_tools/gcc-arm-none-eabi-4_9-2014q4/bin
+
+Obtain the latest version of TivaWare from
+http://software-dl.ti.com/tiva-c/SW-TM4C/latest/index_FDS.html
+
+Build TivaWare:
+cd ~/tiva_tools
+mkdir tivaware
+unzip SW-TM4C-2.1.0.12573.exe -d tivaware
+cd tivaware
+make
+
+Building lm4flash
+cd ~/tiva_tools
+git clone https://github.com/utzig/lm4tools.git
+cd lm4tools/lm4flash
+make
+mv lm4flash ~/tiva_tools/gcc-arm-none-eabi-4_9-2014q4/bin
+
+Setting up the udev rules on Linux
+echo 'SUBSYSTEMS=="usb", ATTRS{idVendor}=="1cbe", ATTRS{idProduct}=="00fd", GROUP="plugdev"' | \
+	sudo tee /etc/udev/rules.d/99-stellaris-launchpad.rules
+sudo usermod -aG plugdev $USER
+sudo udevadm control --reload-rules
+
+Test by flashing the blink code:
+cd ~/arm/tivaware/examples/boards/ek-tm4c123gxl/blinky/gcc
+lm4flash blinky.bin
+
+Now build and load the firmware:
+make clean
+make load
+
+To debug, you will need an up to date OpenOCD. The version in Ubuntu's repos is obsolete.
+sudo apt-get install libtool
+git clone http://git.code.sf.net/p/openocd/code openocd
+cd openocd
+./bootstrap
+./configure --enable-ti-icdi
+make -j5
+sudo make install
+
+Once you have an up to date OpenOCD installed, you can now start debugging:
+/usr/local/bin/openocd --file /usr/local/share/openocd/scripts/board/ek-tm4c1294xl.cfg
+arm-none-eabi-gdb build/bs-memdump-fw.axf
+
+In gdb, you must run the following commands:
+target extended-remote :3333
+monitor reset halt
+load
+monitor reset init
+
+This will leave you halted at the reset ISR. Now set up your breakpoints
+and type "continue" to run your code.

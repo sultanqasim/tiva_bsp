@@ -1,0 +1,26 @@
+build/*
+
+*.o
+*.axf
+*.lst
+
+# Mac Crap
+.DS_Store
+.Spotlight-V100
+.Trashes
+._*
+
+# Eclipse
+.metadata
+*.tmp
+*.bak
+.settings/
+.launch
+
+# Linux (KDE/GNOME)
+*~
+.directory
+
+# Windows
+Thumbs.db
+Desktop.ini

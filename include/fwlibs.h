@@ -55,4 +55,36 @@ static inline void TOGGLE_BIT(uint8_t *buff, uint32_t bit)
 #define NULL ((void *)0)
 #endif
 
+// The new TM4C129x microcontrollers can have a lot of pins...
+typedef enum PinNumber
+{
+    PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7,
+    PB0, PB1, PB2, PB3, PB4, PB5, PB6, PB7,
+    PC0, PC1, PC2, PC3, PC4, PC5, PC6, PC7,
+    PD0, PD1, PD2, PD3, PD4, PD5, PD6, PD7,
+    PE0, PE1, PE2, PE3, PE4, PE5, PE6, PE7,
+    PF0, PF1, PF2, PF3, PF4, PF5, PF6, PF7,
+    PG0, PG1, PG2, PG3, PG4, PG5, PG6, PG7,
+    PH0, PH1, PH2, PH3, PH4, PH5, PH6, PH7,
+    PJ0, PJ1, PJ2, PJ3, PJ4, PJ5, PJ6, PJ7,
+    PK0, PK1, PK2, PK3, PK4, PK5, PK6, PK7,
+    PL0, PL1, PL2, PL3, PL4, PL5, PL6, PL7,
+    PM0, PM1, PM2, PM3, PM4, PM5, PM6, PM7,
+    PN0, PN1, PN2, PN3, PN4, PN5, PN6, PN7,
+    PP0, PP1, PP2, PP3, PP4, PP5, PP6, PP7,
+    PQ0, PQ1, PQ2, PQ3, PQ4, PQ5, PQ6, PQ7
+} PinNumber;
+
+static const uint32_t SysCtlGPIOs[] =
+{
+    SYSCTL_PERIPH_GPIOA, SYSCTL_PERIPH_GPIOB, SYSCTL_PERIPH_GPIOC,
+    SYSCTL_PERIPH_GPIOD, SYSCTL_PERIPH_GPIOE, SYSCTL_PERIPH_GPIOF
+};
+
+static const uint32_t GPIO[] =
+{
+    GPIO_PORTA_BASE, GPIO_PORTB_BASE, GPIO_PORTC_BASE, GPIO_PORTD_BASE,
+    GPIO_PORTE_BASE, GPIO_PORTF_BASE
+};
+
 #endif

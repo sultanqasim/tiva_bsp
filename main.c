@@ -1,5 +1,5 @@
-// Tiva BSP for TM4C129x
-// Copyright (C) 2015 Sultan Qasim Khan
+// Tiva BSP for TM4C123x
+// Copyright (C) 2015-2016 Sultan Qasim Khan
 
 #include <fwlibs.h>
 #include <timer.h>
@@ -44,12 +44,12 @@ int main(void)
     timer_init();
     uart_init(800000);
 
-    // use GPIO port M for output
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);
-    SysCtlPeripheralSleepEnable(SYSCTL_PERIPH_GPIOM);
-    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
-    GPIOPadConfigSet(GPIO_PORTM_BASE, 0xFF, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
-    GPIO_PORTM_DATA_R = 0;
+    // use GPIO port F LEDs for output
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    SysCtlPeripheralSleepEnable(SYSCTL_PERIPH_GPIOF);
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, 0x0E);
+    GPIOPadConfigSet(GPIO_PORTF_BASE, 0x0E, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+    GPIO_PORTF_DATA_R = 0;
 
     uint8_t c;
 
@@ -67,7 +67,7 @@ int main(void)
             handle_example();
             break;
         case CMD_SETGPIO:
-            GPIO_PORTM_DATA_R = uart_read_char();
+            GPIO_PORTF_DATA_R = uart_read_char();
             send_syncword_cmd(CMD_SETGPIO);
             break;
         default:

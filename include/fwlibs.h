@@ -1,5 +1,5 @@
-// Tiva BSP for TM4C129x
-// Copyright (C) 2015 Sultan Qasim Khan
+// Tiva BSP for TM4C123G
+// Copyright (C) 2015-2016 Sultan Qasim Khan
 
 #ifndef FWLIBS_H
 #define FWLIBS_H
@@ -9,14 +9,14 @@
 #include <stdbool.h>
 
 // Chip-specific headers and defines
-#ifndef PART_TM4C1294NCPDT
-#define PART_TM4C1294NCPDT
-#define TARGET_IS_SNOWFLAKE_RA1
+#ifndef PART_TM4C123GH6PM
+#define PART_TM4C123GH6PM
+#define TARGET_IS_BLIZZARD_RA1
 #endif
-#include "inc/tm4c1294ncpdt.h"
+#include "inc/tm4c123gh6pm.h"
 
 // globally define clock speed
-#define CLOCK_SPEED 120000000
+#define CLOCK_SPEED 80000000
 #define MS_CYCLES (CLOCK_SPEED / 1000)
 #define US_CYCLES (CLOCK_SPEED / 1000000)
 

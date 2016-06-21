@@ -1,5 +1,5 @@
 # Makefile for Tiva BSP
-# Copyright (C) 2015 Sultan Qasim Khan
+# Copyright (C) 2015-2016 Sultan Qasim Khan
 
 # Follow build_instructions.txt to set up your toolchain
 # This makefile assumes your tools to be in ~/arm_tools
@@ -23,7 +23,7 @@ BUILD_FLAGS = -std=c99 -Wall -Wextra -pedantic
 ARM_FLAGS = -mthumb -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=softfp
 SECTION_FLAGS = -ffunction-sections -fdata-sections
 INCLUDE_FLAGS = -I ${TIVAWARE_PATH} -I include
-LFLAGS = --gc-sections -T tm4c129.ld
+LFLAGS = --gc-sections -T tm4c123.ld
 OCFLAGS = -Obinary
 ODFLAGS = -S
 BUILD_DIR = build

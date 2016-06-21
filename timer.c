@@ -1,5 +1,5 @@
 // Timer utility functions for Tiva C series
-// Copyright (C) 2015 Sultan Qasim Khan
+// Copyright (C) 2015-2016 Sultan Qasim Khan
 
 #include <timer.h>
 #include <fwlibs.h>
@@ -8,9 +8,8 @@ void delay_isr(void);
 
 void timer_init(void)
 {
-    // Run clock at 120 MHz using PLL and crystal
-    ROM_SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN |
-                             SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), CLOCK_SPEED);
+    // Run clock at 80 MHz using PLL and crystal
+    ROM_SysCtlClockSet(SYSCTL_SYSDIV_2_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
 
     // Configure TIMER4 for timer functions
     ROM_SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER4);

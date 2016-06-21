@@ -1,26 +1,22 @@
 // Software-buffered UART functions for Tiva C series microcontrollers
-// Copyright (C) 2015 Sultan Qasim Khan
+// Copyright (C) 2015-2016 Sultan Qasim Khan
 
 #include <fwlibs.h>
 #include <uart.h>
 
 // Naming convention: write to head, read from tail
 
-// LED setting macros
-#define SET_RXLED(x) HWREG(GPIO_PORTN_BASE + (GPIO_PIN_0 << 2)) = ((x) ? GPIO_PIN_0 : 0)
-#define SET_TXLED(x) HWREG(GPIO_PORTN_BASE + (GPIO_PIN_1 << 2)) = ((x) ? GPIO_PIN_1 : 0)
-
 #define UART_BASE UART0_BASE
 
 // UART read buffer
-#define READ_BUFF_SIZE 4096
+#define READ_BUFF_SIZE 1024
 static uint8_t uart_read_buff[READ_BUFF_SIZE];
 static volatile int32_t urb_head = 0;
 static volatile int32_t urb_tail = 0;
 static volatile bool rb_overflow = false;
 
 // UART write buffer
-#define WRITE_BUFF_SIZE 8192
+#define WRITE_BUFF_SIZE 1024
 static uint8_t uart_write_buff[WRITE_BUFF_SIZE];
 static volatile int32_t uwb_head;
 static volatile int32_t uwb_tail;
@@ -97,8 +93,6 @@ static void flush_read_fifo()
         }
     }
 
-    if (rx_qsize()) SET_RXLED(1);
-
     // Re-enable the interrupt
     ROM_UARTIntEnable(UART_BASE, UART_INT_RX);
 }
@@ -123,8 +117,6 @@ static void flush_write_fifo()
     // Re-enable the interrupt if the queue is not empty
     if (tx_qsize())
         ROM_UARTIntEnable(UART_BASE, UART_INT_TX);
-    else
-        SET_TXLED(0);
 }
 
 
@@ -182,13 +174,6 @@ void uart_init(int32_t baud_rate)
     ROM_SysCtlPeripheralSleepEnable(SYSCTL_PERIPH_TIMER3);
     ROM_TimerConfigure(TIMER3_BASE, TIMER_CFG_ONE_SHOT);
     ROM_TimerEnable(TIMER3_BASE, TIMER_A);
-
-    // Enable PN0 and PN1 and RX and TX LEDs
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);
-    SysCtlPeripheralSleepEnable(SYSCTL_PERIPH_GPION);
-    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, 0x3);
-    GPIOPadConfigSet(GPIO_PORTN_BASE, 0x3, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
-    GPIO_PORTN_DATA_R = 0x0;
 }
 
 
@@ -236,8 +221,6 @@ uint32_t uart_read(void *vdata, uint32_t size, int32_t timeout)
         }
     }
 
-    if (rx_qsize() == 0) SET_RXLED(0);
-
     // Re-enable UART receive interrupt
     ROM_UARTIntEnable(UART_BASE, UART_INT_RX);
 
@@ -252,8 +235,6 @@ uint32_t uart_write(const void *vdata, uint32_t size, int32_t timeout)
 {
     const uint8_t *data = (const uint8_t *)vdata;
     uint32_t bytes_written = 0;
-
-    SET_TXLED(1);
 
     // enqueue all the data until timeout
     if (timeout < 0)

@@ -25,10 +25,18 @@ static uint8_t uart_write_buff[WRITE_BUFF_SIZE];
 static volatile int32_t uwb_head;
 static volatile int32_t uwb_tail;
 
+static inline int32_t inc_roll(int32_t val, int32_t roll)
+{
+    int32_t ret = val + 1;
+    if (ret >= roll) ret -= roll;
+    return ret;
+}
 
 static inline int32_t rx_qsize()
 {
-    return (urb_head - urb_tail) % READ_BUFF_SIZE;
+    int32_t ret = urb_head - urb_tail;
+    if (ret < 0) ret += WRITE_BUFF_SIZE;
+    return ret;
 }
 
 
@@ -36,7 +44,7 @@ static inline int32_t rx_qsize()
 static inline void rx_enqueue(uint8_t c)
 {
     uart_read_buff[urb_head] = c;
-    urb_head = (urb_head + 1) % READ_BUFF_SIZE;
+    urb_head = inc_roll(urb_head, READ_BUFF_SIZE);
 }
 
 
@@ -44,14 +52,16 @@ static inline void rx_enqueue(uint8_t c)
 static inline uint8_t rx_dequeue()
 {
     uint8_t c = uart_read_buff[urb_tail];
-    urb_tail = (urb_tail + 1) % READ_BUFF_SIZE;
+    urb_tail = inc_roll(urb_tail, READ_BUFF_SIZE);
     return c;
 }
 
 
 static inline int32_t tx_qsize()
 {
-    return (uwb_head - uwb_tail) % WRITE_BUFF_SIZE;
+    int32_t ret = uwb_head - uwb_tail;
+    if (ret < 0) ret += WRITE_BUFF_SIZE;
+    return ret;
 }
 
 
@@ -59,7 +69,7 @@ static inline int32_t tx_qsize()
 static inline void tx_enqueue(uint8_t c)
 {
     uart_write_buff[uwb_head] = c;
-    uwb_head = (uwb_head + 1) % WRITE_BUFF_SIZE;
+    uwb_head = inc_roll(uwb_head, WRITE_BUFF_SIZE);
 }
 
 
@@ -67,7 +77,7 @@ static inline void tx_enqueue(uint8_t c)
 static inline uint8_t tx_dequeue()
 {
     uint8_t c = uart_write_buff[uwb_tail];
-    uwb_tail = (uwb_tail + 1) % WRITE_BUFF_SIZE;
+    uwb_tail = inc_roll(uwb_tail, WRITE_BUFF_SIZE);
     return c;
 }
 
@@ -262,7 +272,7 @@ uint32_t uart_write(const void *vdata, uint32_t size, int32_t timeout)
         for (bytes_written = 0; bytes_written < size; bytes_written++)
         {
             // wait for an interrupt to make room in the buffer
-            while (tx_qsize() >= WRITE_BUFF_SIZE) ROM_SysCtlSleep();
+            while (tx_qsize() >= WRITE_BUFF_SIZE - 1) ROM_SysCtlSleep();
             tx_enqueue(data[bytes_written]);
         }
     }
@@ -271,7 +281,7 @@ uint32_t uart_write(const void *vdata, uint32_t size, int32_t timeout)
         // don't block
         for (bytes_written = 0; bytes_written < size; bytes_written++)
         {
-            if (tx_qsize() >= WRITE_BUFF_SIZE) break;
+            if (tx_qsize() >= WRITE_BUFF_SIZE - 1) break;
             tx_enqueue(data[bytes_written]);
         }
     }
@@ -283,7 +293,7 @@ uint32_t uart_write(const void *vdata, uint32_t size, int32_t timeout)
         {
             // busy wait is bad, but I'm lazy and don't care about
             // power consumption in this application
-            while ((tx_qsize() >= WRITE_BUFF_SIZE) && (uart_time() <= timeout));
+            while ((tx_qsize() >= WRITE_BUFF_SIZE - 1) && (uart_time() <= timeout));
             if (uart_time() > timeout) break;
             tx_enqueue(data[bytes_written]);
         }
